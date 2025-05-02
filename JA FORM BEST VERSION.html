@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>แบบฟอร์ม Job Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            padding: 20px;
+        }
+        .form-header {
+            margin-bottom: 20px;
+        }
+        .form-field {
+            margin-bottom: 10px;
+        }
+        .form-field label {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold;
+        }
+        .form-field input {
+            padding: 5px;
+            width: 300px;
+            font-family: 'Prompt', sans-serif;
+        }
+        .action-buttons {
+            margin: 15px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1em;
+        }
+        th, td {
+            border: 1px solid #aaa;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+        textarea {
+            width: 100%;
+            resize: vertical;
+        }
+        input[type="number"] {
+            width: 70px;
+        }
+        .person-container {
+            margin-top: 4px;
+        }
+        button {
+            margin: 4px;
+            font-family: 'Prompt', sans-serif;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background-color: #007acc;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005fa3;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+        }
+        .delete-btn:hover {
+            background-color: #bd2130;
+        }
+        .remove-person-btn {
+            background-color: #ffc107;
+            color: #212529;
+            padding: 4px 8px;
+            font-size: 0.85em;
+        }
+        .remove-person-btn:hover {
+            background-color: #e0a800;
+        }
+        .import-btn {
+            background-color: #28a745;
+        }
+        .import-btn:hover {
+            background-color: #218838;
+        }
+        #fileInput {
+            display: none;
+			
+        }
+
+.top-right-buttons {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+}
+    </style>
+</head>
+<body>
+    <h1 class="form-header">แบบฟอร์ม Job Analysis</h1>
+    
+    <div class="form-field">
+        <label for="department">ฝ่าย:</label>
+        <input type="text" id="department" name="department">
+    </div>
+    
+    <div class="form-field">
+        <label for="job">งาน:</label>
+        <input type="text" id="job" name="job">
+    </div>
+    
+    <div class="form-field">
+        <label for="informant">ผู้ให้ข้อมูล:</label>
+        <input type="text" id="informant" name="informant">
+    </div>
+    
+    <div class="top-right-buttons">
+    <input type="file" id="fileInput" accept=".xlsx, .xls">
+    <button class="import-btn" onclick="document.getElementById('fileInput').click()">นำเข้าไฟล์ Excel</button>
+    <button onclick="exportToExcel()">ส่งออกเป็น Excel</button>
+</div>
+    
+    <h2>แบบฟอร์มบันทึกภารกิจ</h2>
+    <table id="taskTable">
+        <thead>
+            <tr>
+                <th>ลำดับ</th>
+                <th>บทบาทหน้าที่ภารกิจหน่วยงาน</th>
+                <th>สิ่งที่ส่งมอบ</th>
+                <th>โครงการ/กิจกรรม</th>
+                <th>กระบวนการ/ขั้นตอน</th>
+                <th>เวลา (ชม./นาที)</th>
+                <th>เวลาที่ใช้แบ่งตามรายคน</th>
+                <th>ปริมาณงาน</th>
+                <th>หน่วยนับของปริมาณงาน</th>
+                <th>เวลาที่ใช้ในการทำกิจกรรม (คำนวณ)</th>
+                <th>การจัดการ</th>
+            </tr>
+        </thead>
+        <tbody id="formRows">
+        </tbody>
+    </table>
+    <button onclick="addRow()">เพิ่มแถว</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        let rowCount = 0;
+
+        function addRow() {
+            rowCount++;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="row-number">${rowCount}</td>
+                <td><textarea rows="2"></textarea></td>
+                <td><textarea rows="2"></textarea></td>
+                <td><textarea rows="2"></textarea></td>
+                <td><textarea rows="2"></textarea></td>
+                <td class="sum-from-person">-</td>
+                <td>
+                    <div class="person-container">
+                        <div>
+                            <input type="text" placeholder="ชื่อ" />
+                            <input type="number" placeholder="ชม." class="person-hour" min="0" oninput="calculateTotal(this)">
+                            <input type="number" placeholder="นาที" class="person-minute" min="0" oninput="calculateTotal(this)">
+                        </div>
+                    </div>
+                    <button type="button" onclick="addPerson(this)">เพิ่มคน</button>
+                </td>
+                <td><input type="number" class="quantity" min="1" value="1" oninput="calculateTotal(this)"></td>
+                <td><textarea rows="2"></textarea></td>
+                <td class="total-time">-</td>
+                <td><button type="button" class="delete-btn">ลบแถว</button></td>
+            `;
+            document.getElementById('formRows').appendChild(row);
+            
+            // เพิ่ม event listener โดยตรงที่ปุ่มลบแถว
+            row.querySelector('.delete-btn').addEventListener('click', function() {
+                row.remove();
+                updateRowNumbers();
+            });
+        }
+
+        function addPerson(btn) {
+            const container = btn.parentElement.querySelector('.person-container');
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <input type="text" placeholder="ชื่อ" />
+                <input type="number" placeholder="ชม." class="person-hour" min="0" oninput="calculateTotal(this)">
+                <input type="number" placeholder="นาที" class="person-minute" min="0" oninput="calculateTotal(this)">
+                <button type="button" class="remove-person-btn">ลบ</button>
+            `;
+            container.appendChild(div);
+            
+            // เพิ่ม event listener สำหรับปุ่มลบบุคคล
+            div.querySelector('.remove-person-btn').addEventListener('click', function() {
+                div.remove();
+                calculateTotal(btn);
+            });
+        }
+
+        function calculateTotal(input) {
+            const row = input.closest('tr');
+            const hours = row.querySelectorAll('.person-hour');
+            const minutes = row.querySelectorAll('.person-minute');
+            const quantityInput = row.querySelector('.quantity');
+            const quantity = parseInt(quantityInput.value) || 1;
+            
+            let totalMin = 0;
+
+            hours.forEach((h, i) => {
+                const hr = parseInt(h.value) || 0;
+                const min = parseInt(minutes[i].value) || 0;
+                totalMin += hr * 60 + min;
+            });
+
+            const sumCell = row.querySelector('.sum-from-person');
+            const totalCell = row.querySelector('.total-time');
+
+            const hrDisplay = Math.floor(totalMin / 60);
+            const minDisplay = totalMin % 60;
+            sumCell.innerText = `${hrDisplay} ชม. ${minDisplay} นาที`;
+
+            // คำนวณเวลาที่ใช้ทั้งหมดโดยคูณกับปริมาณงาน
+            const totalMinWithQuantity = totalMin * quantity;
+            
+            if (totalMinWithQuantity >= 480) {
+                const days = Math.floor(totalMinWithQuantity / 480);
+                const remain = totalMinWithQuantity % 480;
+                const rHr = Math.floor(remain / 60);
+                const rMin = remain % 60;
+                totalCell.innerText = `${days} วันทำการ` + (remain ? ` ${rHr} ชม. ${rMin} นาที` : '');
+            } else {
+                const totalHours = Math.floor(totalMinWithQuantity / 60);
+                const totalMins = totalMinWithQuantity % 60;
+                totalCell.innerText = `${totalHours} ชม. ${totalMins} นาที`;
+            }
+        }
+
+        function deleteRow(btn) {
+            // ลบแถว
+            const row = btn.closest('tr');
+            row.remove();
+            
+            // จัดลำดับใหม่
+            updateRowNumbers();
+        }
+        
+        function updateRowNumbers() {
+            // อัปเดตลำดับของแถวทั้งหมด
+            const rows = document.querySelectorAll("#formRows tr");
+            rows.forEach((row, index) => {
+                const rowNumberCell = row.querySelector('.row-number');
+                rowNumberCell.textContent = index + 1;
+            });
+            // อัปเดตตัวนับแถว
+            rowCount = rows.length;
+        }
+        
+        function exportToExcel() {
+            const rows = document.querySelectorAll("#taskTable tbody tr");
+            const data = [["ลำดับ", "บทบาทหน้าที่ภารกิจหน่วยงาน", "สิ่งที่ส่งมอบ", "โครงการ/กิจกรรม", "กระบวนการ/ขั้นตอน", "เวลา (ชม./นาที)"]];
+
+            const contentRows = [];
+            let maxPeople = 0;
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td");
+                const rowData = [];
+
+                // Basic fields (1–5)
+                rowData.push(cells[0].innerText);
+                for (let i = 1; i <= 4; i++) {
+                    rowData.push(cells[i].querySelector("textarea")?.value || "");
+                }
+
+                // รวมเวลา
+                rowData.push(cells[5].innerText);
+
+                // รายชื่อและเวลาแยกรายคน
+                const people = [...cells[6].querySelectorAll(".person-container > div")];
+                const peopleData = [];
+                people.forEach(div => {
+                    const name = div.querySelector("input[type=text]")?.value || "";
+                    const h = parseInt(div.querySelector(".person-hour")?.value) || 0;
+                    const m = parseInt(div.querySelector(".person-minute")?.value) || 0;
+                    const timeStr = `${h} ชม. ${m} นาที`;
+                    peopleData.push(name, timeStr);
+                });
+
+                if (peopleData.length / 2 > maxPeople) {
+                    maxPeople = peopleData.length / 2;
+                }
+
+                rowData.push(...peopleData);
+
+                // ปริมาณงาน + หน่วยนับ
+                rowData.push(cells[7].querySelector(".quantity")?.value || "1");
+                rowData.push(cells[8].querySelector("textarea")?.value || "");
+
+                // เวลาที่ใช้ในการทำกิจกรรม
+                rowData.push(cells[9].innerText);
+
+                contentRows.push(rowData);
+            });
+
+            // Update header to match maxPeople
+            for (let i = 1; i <= maxPeople; i++) {
+                data[0].push(`ชื่อคนที่ ${i}`);
+                data[0].push(`เวลาคนที่ ${i}`);
+            }
+
+            data[0].push("ปริมาณงาน");
+            data[0].push("หน่วยนับของปริมาณงาน");
+            data[0].push("เวลาที่ใช้ในการทำกิจกรรม");
+
+            // Fill missing person columns per row
+            contentRows.forEach(row => {
+                const currentPeople = (row.length - 6 - 3) / 2; // 6 static fields before people, 3 fields after (qty, unit, time)
+                const missing = maxPeople - currentPeople;
+                for (let i = 0; i < missing; i++) {
+                    row.splice(6 + (currentPeople * 2), 0, "", "");
+                }
+                data.push(row);
+            });
+
+            // เพิ่มข้อมูลหัวแบบฟอร์ม
+            const department = document.getElementById('department').value || "";
+            const job = document.getElementById('job').value || "";
+            const informant = document.getElementById('informant').value || "";
+            
+            // สร้างอาร์เรย์ใหม่สำหรับข้อมูลทั้งหมด
+            const finalData = [];
+            
+            // เพิ่มข้อมูลหัวแบบฟอร์มตามลำดับที่ถูกต้อง
+            finalData.push(["แบบฟอร์ม Job Analysis", "", "", "", "", ""]);
+            finalData.push(["ฝ่าย", department, "", "", "", ""]);
+            finalData.push(["งาน", job, "", "", "", ""]);
+            finalData.push(["ผู้ให้ข้อมูล", informant, "", "", "", ""]);
+            finalData.push(["", "", "", "", "", ""]);  // เว้นบรรทัด
+            
+            // เพิ่มข้อมูลตารางต่อจากนั้น
+            data.forEach(row => finalData.push(row));
+
+            const ws = XLSX.utils.aoa_to_sheet(finalData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "ภารกิจ");
+            XLSX.writeFile(wb, "job_analysis_form.xlsx");
+        }
+
+        // เพิ่มฟังก์ชันสำหรับนำเข้าไฟล์ Excel
+        document.getElementById('fileInput').addEventListener('change', importFromExcel);
+
+        function importFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                // อ่านข้อมูลจาก Sheet แรก
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                // ตรวจสอบว่ามีข้อมูลหัวแบบฟอร์มหรือไม่
+                if (jsonData.length > 4) {
+                    // ตรวจสอบและนำเข้าข้อมูลหัวแบบฟอร์ม
+                    for (let i = 0; i < jsonData.length; i++) {
+                        if (jsonData[i][0] === "ฝ่าย" && jsonData[i][1]) {
+                            document.getElementById('department').value = jsonData[i][1];
+                        }
+                        if (jsonData[i][0] === "งาน" && jsonData[i][1]) {
+                            document.getElementById('job').value = jsonData[i][1];
+                        }
+                        if (jsonData[i][0] === "ผู้ให้ข้อมูล" && jsonData[i][1]) {
+                            document.getElementById('informant').value = jsonData[i][1];
+                        }
+                    }
+                    
+                    // หาแถวที่เป็นหัวตาราง (มีคำว่า "ลำดับ" ในคอลัมน์แรก)
+                    let headerRowIndex = -1;
+                    for (let i = 0; i < jsonData.length; i++) {
+                        if (jsonData[i][0] === "ลำดับ") {
+                            headerRowIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    if (headerRowIndex !== -1 && jsonData.length > headerRowIndex + 1) {
+                        // ลบแถวทั้งหมดจากตาราง
+                        document.getElementById('formRows').innerHTML = '';
+                        rowCount = 0;
+                        
+                        // เพิ่มข้อมูลเข้าไปในตาราง
+                        for (let i = headerRowIndex + 1; i < jsonData.length; i++) {
+                            if (!jsonData[i][0]) continue; // ข้ามแถวที่ไม่มีลำดับ
+                            
+                            rowCount++;
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td class="row-number">${rowCount}</td>
+                                <td><textarea rows="2">${jsonData[i][1] || ''}</textarea></td>
+                                <td><textarea rows="2">${jsonData[i][2] || ''}</textarea></td>
+                                <td><textarea rows="2">${jsonData[i][3] || ''}</textarea></td>
+                                <td><textarea rows="2">${jsonData[i][4] || ''}</textarea></td>
+                                <td class="sum-from-person">${jsonData[i][5] || '-'}</td>
+                                <td>
+                                    <div class="person-container">
+                                    </div>
+                                    <button type="button" onclick="addPerson(this)">เพิ่มคน</button>
+                                </td>
+                                <td><input type="number" class="quantity" min="1" value="${jsonData[i][jsonData[i].length - 3] || '1'}" oninput="calculateTotal(this)"></td>
+                                <td><textarea rows="2">${jsonData[i][jsonData[i].length - 2] || ''}</textarea></td>
+                                <td class="total-time">${jsonData[i][jsonData[i].length - 1] || '-'}</td>
+                                <td><button type="button" class="delete-btn">ลบแถว</button></td>
+                            `;
+                            document.getElementById('formRows').appendChild(row);
+                            
+                            // เพิ่ม event listener โดยตรงที่ปุ่มลบแถว
+                            row.querySelector('.delete-btn').addEventListener('click', function() {
+                                row.remove();
+                                updateRowNumbers();
+                            });
+                            
+                            // เพิ่มข้อมูลรายคน
+                            const personContainer = row.querySelector('.person-container');
+                            // ตรวจสอบจำนวนคนจากข้อมูล (คอลัมน์ 6 เป็นต้นไป)
+                            const startPersonCol = 6;
+                            const peopleCount = Math.floor((jsonData[i].length - startPersonCol - 3) / 2);
+                            
+                            for (let p = 0; p < peopleCount; p++) {
+                                const nameCol = startPersonCol + (p * 2);
+                                const timeCol = nameCol + 1;
+                                
+                                if (jsonData[i][nameCol] || jsonData[i][timeCol]) {
+                                    const div = document.createElement('div');
+                                    // แยกชั่วโมงและนาทีจากข้อความ
+                                    let hours = 0;
+                                    let minutes = 0;
+                                    
+                                    if (jsonData[i][timeCol]) {
+                                        const timeStr = jsonData[i][timeCol].toString();
+                                        const hrMatch = timeStr.match(/(\d+)\s*ชม/);
+                                        const minMatch = timeStr.match(/(\d+)\s*นาที/);
+                                        
+                                        if (hrMatch) hours = parseInt(hrMatch[1]);
+                                        if (minMatch) minutes = parseInt(minMatch[1]);
+                                    }
+                                    
+                                    div.innerHTML = `
+                                        <input type="text" placeholder="ชื่อ" value="${jsonData[i][nameCol] || ''}" />
+                                        <input type="number" placeholder="ชม." class="person-hour" min="0" value="${hours}" oninput="calculateTotal(this)">
+                                        <input type="number" placeholder="นาที" class="person-minute" min="0" value="${minutes}" oninput="calculateTotal(this)">
+                                        <button type="button" class="remove-person-btn">ลบ</button>
+                                    `;
+                                    personContainer.appendChild(div);
+                                    
+                                    // เพิ่ม event listener สำหรับปุ่มลบบุคคล
+                                    div.querySelector('.remove-person-btn').addEventListener('click', function() {
+                                        div.remove();
+                                        calculateTotal(row.querySelector('.person-hour'));
+                                    });
+                                }
+                            }
+                            
+                            // ถ้าไม่มีข้อมูลคนเลย ให้เพิ่มแถวว่างหนึ่งแถว
+                            if (peopleCount === 0) {
+                                const div = document.createElement('div');
+                                div.innerHTML = `
+                                    <input type="text" placeholder="ชื่อ" />
+                                    <input type="number" placeholder="ชม." class="person-hour" min="0" oninput="calculateTotal(this)">
+                                    <input type="number" placeholder="นาที" class="person-minute" min="0" oninput="calculateTotal(this)">
+                                `;
+                                personContainer.appendChild(div);
+                            }
+                            
+                            // คำนวณเวลารวม
+                            calculateTotal(row.querySelector('.person-hour'));
+                        }
+                    }
+                }
+                
+                // รีเซ็ต input file เพื่อให้สามารถเลือกไฟล์เดิมซ้ำได้
+                document.getElementById('fileInput').value = '';
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => addRow());
+    </script>
+</body>
+</html>
