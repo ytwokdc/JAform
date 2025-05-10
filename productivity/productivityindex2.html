@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>แบบฟอร์มบันทึก Productivity</title>
+  <style>
+  body { font-family: sans-serif; max-width: 1000px; margin: 2rem auto; }
+  h2 { text-align: center; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; table-layout: fixed; }
+  th, td { padding: 0.5rem; border: 1px solid #ccc; vertical-align: top; }
+  td input[type="text"],
+  td input[type="number"],
+  td select { width: 100%; padding: 0.4rem; box-sizing: border-box; }
+  input[type="date"] { padding: 0.4rem; }
+  button { padding: 0.5rem 1rem; margin: 0.5rem 0; }
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@600&family=Sarabun&display=swap" rel="stylesheet">
+<style>
+  body, input, select, textarea, button {
+    font-family: 'Sarabun', sans-serif;
+  }
+  h2 {
+    font-family: 'Prompt', sans-serif;
+  }
+</style>
+</head>
+<body>
+<h2>แบบฟอร์ม Productivity รายวัน</h2>
+<form id="productivity-form">
+  <div style="display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1rem;">
+  <div style="flex: 1;">
+    <label for="name">ชื่อ-สกุล:</label><br>
+    <input type="text" name="name" id="name" required>
+  </div>
+  <div style="flex: 1;">
+    <label for="department">ฝ่าย:</label><br>
+    <input type="text" name="department" id="department" required>
+  </div>
+  <div style="flex: 1;">
+    <label for="unit">งาน:</label><br>
+    <input type="text" name="unit" id="unit" required>
+  </div>
+  <div style="flex: 1;">
+    <label for="date">วันที่กรอก:</label><br>
+    <input type="date" name="date" id="date" required>
+  </div>
+</div>
+<div style="flex: 1;">
+  <label for="month">เดือน (สำหรับรายงาน):</label><br>
+  <select name="month" id="month" required>
+    <option value="">-- เลือกเดือน --</option>
+    <option value="2025-01">มกราคม 2025</option>
+    <option value="2025-02">กุมภาพันธ์ 2025</option>
+    <option value="2025-03">มีนาคม 2025</option>
+    <option value="2025-04">เมษายน 2025</option>
+    <option value="2025-05">พฤษภาคม 2025</option>
+    <option value="2025-06">มิถุนายน 2025</option>
+    <option value="2025-07">กรกฎาคม 2025</option>
+    <option value="2025-08">สิงหาคม 2025</option>
+    <option value="2025-09">กันยายน 2025</option>
+    <option value="2025-10">ตุลาคม 2025</option>
+    <option value="2025-11">พฤศจิกายน 2025</option>
+    <option value="2025-12">ธันวาคม 2025</option>
+  </select>
+</div>
+<br>
+
+  <table id="task-table">
+    <thead>
+      <tr>
+        <th style="width: 20%">Key Project</th>
+        <th style="width: 22%">Key Activity</th>
+        <th style="width: 28%">รายละเอียดกิจกรรม</th>
+        <th>Man day</th>
+        <th>ลบ</th>
+      </tr>
+    </thead>
+    <tbody id="task-body"></tbody>
+  </table>
+
+  <button type="button" onclick="addRow()">+ เพิ่มกิจกรรม</button><br>
+  <button type="submit">ส่งข้อมูล</button>
+</form>
+
+<script>
+const activityMap = {
+  "Y1 Engagement": [
+    "Y1-1 Survey Engagement",
+    "Y1-2 Engagement & Communication & Training Plan กิจกรรมปฐมนิเทศพนักงานใหม่",
+    "Y1-2 Engagement & Communication & Training Plan กิจกรรมที่เกี่ยวข้องอื่น ๆ เช่น สื่อสาร ให้ปรึกษา ติดตามข้อมูล จัดฝึกอบรม เป็นต้น" 
+  ],
+  "Y2 Career Development": [
+    "Y2-1 กระบวนการการประเมิน Competency",
+    "Y2-2 HRD Training  Development Language Proficiency Development Program",
+    "Y2-2 HRD Training  Development Functional Competency based Development Program",
+    "Y2-2 HRD Training  Development IT Proficiency Development Program",
+    "Y2-2 HRD Training  Development กิจกรรมอื่นๆ ที่เกี่ยวข้อง Career Development"
+  ],
+  "Y3 Quality Management System": [
+    "Y3-1 ให้คำปรึกษาการดำเนินงานที่เกี่ยวข้องในระบบ ISO 9001",
+    "Y3-1 ISO 9001 Meeting สก.",
+    "Y3-1 ISO 9001 Document Control และ QM/PM/I/F รวม (XX-NS-MG-XXX)",
+    "Y3-1 ISO 9001 e-CAR/PAR System",
+    "Y3-1 ISO 9001 Management Review",
+    "Y3-1 ISO 9001 Internal Audit",
+    "Y3-1 ISO 9001 External Audit",
+    "Y3-1 การปรับปรุงระบบ ISO 9001 ตามนโยบายแต่ละปี",
+    "Y3-1 กิจกรรม ISO 9001 และ ISO 45001 ภายในฝ่าย HROD",
+    "Y3-2 ISO 17025 ให้คำปรึกษา",
+    "Y3-2 ISO 17025 Document Control",
+    "Y3-2 ISO 17025 Internal Audit",
+    "Y3-2 ISO 17025 External Audit",
+    "Y3-2 ISO 17025 กิจกรรมอื่นๆ ที่เกี่ยวข้องกับ ISO 17025",
+    "Y3-3 IS0 13485 ให้คำปรึกษา",
+    "Y3-3 IS0 13485 Document Control",
+    "Y3-3 IS0 13485 Internal Audit",
+    "Y3-3 IS0 13485 External Audit",
+    "Y3-3 IS0 13485 กิจกรรมอื่นๆ ที่เกี่ยวข้องกับ IS0 13485",
+    "Y3-4 HRD Training Development จัดฝึกอบรมที่เกี่ยวข้องกับ ISO 9001",
+    "Y3-4 HRD Training Development จัดฝึกอบรมที่เกี่ยวข้องกับ ISO 45001 หรือหลักสูตรความปลอดภัย",
+    "Y3-4 HRD Training Development จัดฝึกอบรมที่เกี่ยวข้องกับ ISO 17025",
+    "Y3-4 HRD Training Development จัดฝึกอบรมที่เกี่ยวข้องกับ ISO 13485",
+    "Y3-4 HRD Training Development จัดฝึกอบรมที่เกี่ยวข้องมาตรฐานอื่นๆ",
+    "Y3-5 KPI+SLA รวบรวมและสรุปรายงานผล KPI และ SLA",
+    "Y3-5 KPI+SLA ให้คำปรึกษา",
+    "Y3-5 KPI+SLA กิจกรรมอื่นๆ ที่เกี่ยวข้องกับ KPI+SLA",
+    "Y3-6 ICS/ECS กิจกรรมที่เกี่ยวข้องกับ ICS/ECS"
+  ],
+  "Y4 HR Strategy & Process Improvement": [
+    "Y4-1 กระบวนการทำ HR Strategy และการรายงานผลต่อผู้บริหาร/กรมบัญชีกลาง/กพร.",
+    "Y4-2 โครงการปรับปรุงภายใต้ HR Plan / HRD Plan",
+    "Y4-3 BSC เข้าประชุม BSC Core Team",
+    "Y4-3 BSC Lag KPIs ที่เกี่ยวข้องกับด้าน HR (รวบรวมรายงานส่งฝ่ายกลยุทธ์)",
+    "Y4-3 BSC & KPI reporting สายงานบริหาร",
+    "Y4-3 BSC Lead KPI ที่เกี่ยวข้องกับ HROD สวทช. (Deployment HROD ศูนย์ฯ + ประสานการรายงานผลต่อที่ประชุม)",
+    "Y4-3 BSC การจัดฝึกอบรมที่ตอบแผนกลยุทธ์องค์กร (เช่น BCG / Corebusiness)",
+    "Y4-4 โครงการ iStyle วางแผนโครงการ / สื่อสาร /จัดทำรายงานที่เกี่ยวข้อง",
+    "Y4-4 โครงการ iStyle จัดกิจกรรมฝึกอบรมในหลักสูตรที่เกี่ยวข้อง",
+    "Y4-4 โครงการ iStyle จัดกิจกรรมนำเสนอโครงการ",
+    "Y4-4 โครงการ iStyle การให้คำปรึกษาโครงการ",
+    "Y4-4 โครงการ iStyle งานประกาศรางวัลโครงการดีเด่น",
+    "Y4-4 โครงการ iStyle โครงการ iStyle ภายในฝ่าย HROD",
+    "Y4-5 Risk Management ระดับ สวทช.",
+    "Y4-5 Risk Management ระดับ ศูนย์สายงาน",
+    "Y4-5 Risk Management จัดทำ BTD สก. พร้อมแก้ไขตามที่มีข้อเสนอแนะ",
+    "Y4-6 โครงการ 5ส. การตรวจพื้นที่ 5ส ครั้งที่ 1 ประจำปี",
+    "Y4-6 โครงการ 5ส. การตรวจพื้นที่ 5ส ครั้งที่ 2 ประจำปี",
+    "Y4-6 โครงการ 5ส. ประชุมคณะกรรมการตรวจประเมินพื้นที่ 5ส",
+    "Y4-6 โครงการ 5ส. ประชุมผู้ประสานงานกิจกรรม 5ส",
+    "Y4-6 โครงการ 5ส. จัดกิจกรรมสะสางตู้รางเลื่อน",
+    "Y4-6 โครงการ 5ส. จัดกิจกรรม Big Cleaning Day",
+    "Y4-6 โครงการ 5ส. ให้คำปรึกษาหน่วยงาน",
+    "Y4-6 โครงการ 5ส. จัดงานประกาศรางวัล 5ส.",
+    "Y4-6 โครงการ 5ส. โครงการทำลายเอกสาร",
+    "Y4-6 โครงการ 5ส. กิจกรรมอื่นๆ ที่เกี่ยวข้องกับโครงการ 5ส.",
+    "Y4-6 โครงการ 5ส. โครงการ 5ส. ของ HROD",
+    "Y4-7 VOU สื่อสารโครงการ เช่น ช่องทางการรับข้อเสนอแนะ เป็นต้น",
+    "Y4-7 VOU รับข้อมูลข้อเสนอแนะและพิจารณาขั้นต้น (ราย case)",
+    "Y4-7 VOU ประชุมหารือแนวทางการหาสาเหตุ แก้ไข ป้องกันจากข้อเสนอแนะที่พบและติดตามการดำเนินการ (ราย case)",
+    "Y4-7 VOU Reporting: สรุปข้อมูลและรายงานผล สถานะการดำเนินการ",
+    "Y4-7 VOU เสนอต่อประธานโครงการ VOU",
+    "Y4-7 VOU เสนอที่ประชุม MCM (รายเดือน)",
+    "Y4-8 Productivity สรุป Input ค่าใช้จ่ายด้านบุคลากร และค่าใช้จ่ายปันส่วน",
+    "Y4-8 Productivity จัดทำฐานข้อมูลกลาง Productivity",
+    "Y4-8 Productivity ให้คำปรึกษาด้าน Productivity",
+    "Y4-8 Productivity รายงาน Productivity ของฝ่าย HROD",
+    "Y4-8 Productivity กิจกรรมอื่นๆ ที่เกี่ยวกับ Productivity"
+  ],
+    "Y5 Leadership Development and Succession Plan": [
+    "Y5-1 การจัดฝึกอบรมที่เกี่ยวข้องกับ Succession plan/PPR",
+    "Y5-1 กิจกรรมอื่นๆ ที่กี่ยวข้องกับ Succession plan/PPR",
+    "Y5-2 การจัดฝึกอบรมที่เกี่ยวข้องกับ Middle Management Development",
+    "Y5-2 กิจกรรมอื่นๆ ที่กี่ยวข้องกับ Middle Management Development",
+    "Y5-3 การจัดฝึกอบรมที่เกี่ยวข้องกับ Top Management Development",
+    "Y5-3 กิจกรรมอื่นๆ ที่เกี่ยวข้องกับ Top Management Development"
+  ],
+  "Y6 Meeting": [
+    "Y6-1 ประชุม MCM",
+    "Y6-2 ประชุม OM",
+    "Y6-3 ประชุม HR Top / XAB",
+    "Y6-4 ประชุมอนุบุคคล",
+    "Y6-5 ประชุม HROD/ประชุมภายในแต่ละงาน/หัวหน้างาน/HRM",
+    "Y6-6 ประชุมเลื่อนตำแหน่ง",
+    "Y6-7 ประชุม PPR/Pre PIP/PIP/BATTLE และอื่นๆที่เกี่ยวข้องกับงานผู้ประสานงาน"
+  ],
+  "Y7 Report": [
+    "Y7-1 รายงาน PMQA / TQA การดำเนินการสมัครขอรับรางวัลการจัดการภาครัฐ",
+    "Y7-2 รายงาน ITA",
+    "Y7-3 รายงานคุณธรรมและความโปร่งใส",
+    "Y7-4 รายงาน PowerBI",
+    "Y7-5 Current Employee Report",
+    "Y7-6 รายงาน Research Course Report",
+    "Y7-7 รายงาน HR Executive Report",
+    "Y7-8 รายงาน IC Score",
+    "Y7-9 รายงาน Safety Report"
+  ],
+  "Y8 Performance management": [
+    "Y8-1 การเลื่อนตำแหน่ง (รวมการปรับปรุงเกณฑ์/การปรับปรุงระบบ)",
+    "Y8-2 ทดลองงาน",
+    "Y8-3 การบริหารคนตาม Performance management (Top&Bottom)",
+    "Y8-4 การวางแผน IADP/ติดตามประเมินผล/การขึ้นเงินเดือนประจำปี/การขอยกเว้นกรอบค่าใช้จ่ายบุคลากร/Special Adjustment"
+  ],
+  "Y9 Organization & Role Profile": [
+    "Y9-1 ปรับปรุงโครงสร้างองค์กรงาน เข้าประชุมคณะทำงานกลั่นกรองโครงสร้าง",
+    "Y9-1 ปรับปรุงโครงสร้างองค์กรงาน จัดทำข้อมูลสนับสนุนเพื่อประกอบการพิจารณาในที่ประชุม คณะทำงานกลั่นกรองโครงสร้าง (FD update + ประเมินค่างาน)",
+    "Y9-2 ปรับปรุงโครงสร้างตำแหน่ง",
+    "Y9-3 ประชุมกลั่นกรองโครงสร้างองค์กรและประเมินค่างาน"
+  ],
+  "งานอื่นๆ ที่ได้รับมอบหมาย": [
+    "iService",
+    "HRSS",
+    "งานมอบหมายจากศูนย์",
+    "งบประมาณฝ่าย / งาน",
+    "งานอื่น ๆ"
+  ],
+  "ประชุมอื่นๆ / อบรมหลักสูตรต่างๆ": [
+    "ประชุม ISO 27001 (IT)",
+    "อบรมหลักสูตร เกี่ยวกับ ISO และมาตรฐานต่างๆ ที่เกี่ยวข้อง เช่น Transition Version เป็นต้น",
+    "อบรมหลักสูตรปฐมพยาบาล/ดับเพลิง",
+    "NSTDA Day / สื่อสารสายงาน / Comunication Day",
+    "อบรมอื่นๆ",
+    "ประชุมอื่นๆ ที่ไม่เกี่ยวข้องกับภารกิจงานหลักของ HROD"
+  ]
+};
+
+const form = document.getElementById('productivity-form');
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(form);
+  const name = formData.get('name');
+  const department = formData.get('department');
+  const unit = formData.get('unit');
+  const date = formData.get('date');
+  const keyProjects = formData.getAll('key_project[]');
+  const keyActivities = formData.getAll('key_activity[]');
+  const details = formData.getAll('detail[]');
+  const mandays = formData.getAll('manday[]');
+  const month = formData.get('month');
+
+  const payload = keyProjects.map((kp, i) => ({
+    department,
+    unit,
+    name,
+    date,
+    key_project: kp,
+    key_activity: keyActivities[i],
+    detail: details[i],
+    manday: parseFloat(mandays[i]),
+	month
+  }));
+
+  await fetch('https://your-n8n-domain/webhook-log-productivity', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  alert('ส่งข้อมูลเรียบร้อยแล้ว');
+  form.reset();
+  document.getElementById('task-body').innerHTML = '';
+  addRow();
+});
+function addRow() {
+  const tbody = document.getElementById('task-body');
+  const rowId = Date.now();
+  const row = document.createElement('tr');
+
+  const keyProjectOptions = Object.keys(activityMap).map(k => `<option value="${k}">${k}</option>`).join('');
+
+  row.innerHTML = `
+    <td>
+      <select name="key_project[]" onchange="updateActivities(this, 'activity-${rowId}')" required>
+        <option value="">-- เลือก Key Project --</option>
+        ${keyProjectOptions}
+      </select>
+    </td>
+    <td>
+      <select name="key_activity[]" id="activity-${rowId}" required>
+        <option value="">-- เลือก Key Activity --</option>
+      </select>
+    </td>
+    <td><textarea name="detail[]" rows="3" style="resize: vertical; width: 100%;" required></textarea></td>
+    <td><input type="number" name="manday[]" step="0.01" min="0" required></td>
+    <td style="vertical-align: top; text-align: center;"><button type="button" onclick="this.closest('tr').remove()">ลบ</button></td>
+  `;
+  tbody.appendChild(row);
+}
+
+function updateActivities(selectEl, activitySelectId) {
+  const selected = selectEl.value;
+  const activitySelect = document.getElementById(activitySelectId);
+  activitySelect.innerHTML = '';
+  if (activityMap[selected]) {
+    activityMap[selected].forEach(act => {
+      const opt = document.createElement('option');
+      opt.value = act;
+      opt.textContent = act;
+      activitySelect.appendChild(opt);
+    });
+  }
+}
+
+addRow();
+
+document.getElementById('date').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
