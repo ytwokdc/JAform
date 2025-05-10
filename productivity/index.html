@@ -22,6 +22,20 @@
     font-family: 'Prompt', sans-serif;
   }
 </style>
+<!-- ใส่ไว้ใน <head> หรือก่อนปิด </body> -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  flatpickr("#date", {
+    dateFormat: "d/m/Y",
+    locale: "th"
+  });
+});
+</script>
+
 </head>
 <body>
 <h2>แบบฟอร์ม Productivity รายวัน</h2>
@@ -41,8 +55,9 @@
   </div>
   <div style="flex: 1;">
     <label for="date">วันที่กรอก:</label><br>
-    <input type="date" name="date" id="date" required>
+   <input type="text" id="date" name="date" placeholder="เลือกวันที่" required>
   </div>
+  
 </div>
 <div style="flex: 1;">
   <label for="month">เดือน (สำหรับรายงาน):</label><br>
@@ -302,6 +317,7 @@ function updateActivities(selectEl, activitySelectId) {
 addRow();
 
 document.getElementById('date').value = new Date().toISOString().split('T')[0];
+
 </script>
 </body>
 </html>
