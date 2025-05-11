@@ -13,29 +13,28 @@
   td select { width: 100%; padding: 0.4rem; box-sizing: border-box; }
   input[type="date"] { padding: 0.4rem; }
   button { padding: 0.5rem 1rem; margin: 0.5rem 0; }
+  /* ปรับแต่ง flatpickr ให้แสดงผลได้ดีขึ้น */
+
+  .flatpickr-calendar {
+  z-index: 99999 !important;
+  visibility: visible !important;
+}
+
+  }
+  </style>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@600&family=Sarabun&display=swap" rel="stylesheet">
-<style>
-  body, input, select, textarea, button {
-    font-family: 'Sarabun', sans-serif;
-  }
-  h2 {
-    font-family: 'Prompt', sans-serif;
-  }
-</style>
-<!-- ใส่ไว้ใน <head> หรือก่อนปิด </body> -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  flatpickr("#date", {
-    dateFormat: "d/m/Y",
-    locale: "th"
-  });
-});
-</script>
-
+  <style>
+    body, input, select, textarea, button {
+      font-family: 'Sarabun', sans-serif;
+    }
+    h2 {
+      font-family: 'Prompt', sans-serif;
+    }
+  </style>
+  <!-- นำ Flatpickr มารวมไว้ตรงนี้ทั้งหมด -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
 </head>
 <body>
 <h2>แบบฟอร์ม Productivity รายวัน</h2>
@@ -55,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
   </div>
   <div style="flex: 1;">
     <label for="date">วันที่กรอก:</label><br>
-   <input type="text" id="date" name="date" placeholder="เลือกวันที่" required>
+    <input type="text" id="date" name="date" placeholder="เลือกวันที่" required>
   </div>
   
 </div>
@@ -260,20 +259,25 @@ form.addEventListener('submit', async (e) => {
     key_activity: keyActivities[i],
     detail: details[i],
     manday: parseFloat(mandays[i]),
-	month
+    month
   }));
 
-  await fetch('https://your-n8n-domain/webhook-log-productivity', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-
-  alert('ส่งข้อมูลเรียบร้อยแล้ว');
-  form.reset();
-  document.getElementById('task-body').innerHTML = '';
-  addRow();
+  try {
+    await fetch('https://your-n8n-domain/webhook-log-productivity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    alert('ส่งข้อมูลเรียบร้อยแล้ว');
+    form.reset();
+    document.getElementById('task-body').innerHTML = '';
+    addRow();
+  } catch (error) {
+    console.error("เกิดข้อผิดพลาดในการส่งข้อมูล:", error);
+    alert('เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง');
+  }
 });
+
 function addRow() {
   const tbody = document.getElementById('task-body');
   const rowId = Date.now();
@@ -303,7 +307,7 @@ function addRow() {
 function updateActivities(selectEl, activitySelectId) {
   const selected = selectEl.value;
   const activitySelect = document.getElementById(activitySelectId);
-  activitySelect.innerHTML = '';
+  activitySelect.innerHTML = '<option value="">-- เลือก Key Activity --</option>';
   if (activityMap[selected]) {
     activityMap[selected].forEach(act => {
       const opt = document.createElement('option');
@@ -314,10 +318,22 @@ function updateActivities(selectEl, activitySelectId) {
   }
 }
 
-addRow();
+// เพิ่มแถวแรกเมื่อโหลดหน้า
+document.addEventListener('DOMContentLoaded', function() {
+  addRow();
+  
+  // กำหนดค่า flatpickr ที่นี่หลังจาก DOM โหลดเสร็จ
+  flatpickr("#date", {
+  dateFormat: "d/m/Y",
+  locale: "th",
+  defaultDate: "today",
+  disableMobile: true,
+  allowInput: true,
+  clickOpens: true,
+  static: true   // << จุดสำคัญ อยู่ติด input เสมอ
+});
 
-document.getElementById('date').value = new Date().toISOString().split('T')[0];
-
+});
 </script>
 </body>
 </html>
