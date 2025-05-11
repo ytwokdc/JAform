@@ -308,17 +308,14 @@ function updateActivities(selectEl, activitySelectId) {
   const selected = selectEl.value;
   const activitySelect = document.getElementById(activitySelectId);
   activitySelect.innerHTML = '';
-if (activityMap[selected]) {
-  activityMap[selected].forEach((act, index) => {
-    const opt = document.createElement('option');
-    opt.value = act;
-    opt.textContent = act;
-    activitySelect.appendChild(opt);
-  });
-  // เลือกรายการแรกโดยอัตโนมัติ
-  activitySelect.selectedIndex = 0;
-}
-
+  if (activityMap[selected]) {
+    activityMap[selected].forEach(act => {
+      const opt = document.createElement('option');
+      opt.value = act;
+      opt.textContent = act;
+      activitySelect.appendChild(opt);
+    });
+  }
 }
 
 // เพิ่มแถวแรกเมื่อโหลดหน้า
