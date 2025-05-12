@@ -425,6 +425,46 @@ async function confirmSubmit() {
     alert('เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง');
   }
 }
+function previewData() {
+  const formData = new FormData(document.getElementById('productivity-form'));
+  const name = formData.get('name');
+  const department = formData.get('department');
+  const unit = formData.get('unit');
+  const date = formData.get('date');
+  const month = formData.get('month');
+  const keyProjects = formData.getAll('key_project[]');
+  const keyActivities = formData.getAll('key_activity[]');
+  const details = formData.getAll('detail[]');
+  const mandays = formData.getAll('manday[]');
+
+  let html = `<p><strong>ชื่อ-สกุล:</strong> ${name}</p>`;
+  html += `<p><strong>ฝ่าย:</strong> ${department}</p>`;
+  html += `<p><strong>งาน:</strong> ${unit}</p>`;
+  html += `<p><strong>วันที่:</strong> ${date}</p>`;
+  html += `<p><strong>เดือนที่รายงาน:</strong> ${month}</p>`;
+
+  html += "<table border='1' cellpadding='5'><thead><tr><th>Key Project</th><th>Key Activity</th><th>รายละเอียด</th><th>Man Day</th></tr></thead><tbody>";
+
+  for (let i = 0; i < keyProjects.length; i++) {
+    html += `<tr>
+      <td>${keyProjects[i]}</td>
+      <td>${keyActivities[i]}</td>
+      <td>${details[i]}</td>
+      <td>${mandays[i]}</td>
+    </tr>`;
+  }
+
+  html += "</tbody></table>";
+
+  document.getElementById('preview-content').innerHTML = html;
+  document.getElementById('productivity-form').style.display = 'none';
+  document.getElementById('preview-screen').style.display = 'block';
+}
+
+function cancelPreview() {
+  document.getElementById('preview-screen').style.display = 'none';
+  document.getElementById('productivity-form').style.display = 'block';
+}
 
 });
 </script>
