@@ -1,4 +1,4 @@
-const API_BASE = "https://script.google.com/macros/s/AKfycbw6AtQIuedTWyYKAZZ0ild3UKegJRfgndsKqAiDgBgOin4hbhAA0eJ_xq-TwEcl97sL/exec";
+const API_BASE = "https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_ID/exec";
 
 window.addEventListener("DOMContentLoaded", () => {
   fetch(`${API_BASE}?action=get-records`)
@@ -11,33 +11,35 @@ window.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("editRecordForm").addEventListener("submit", (e) => {
     e.preventDefault();
-    const payload = {
-      id: document.getElementById("edit-id").value,
-      name: document.getElementById("edit-name").value,
-      department: document.getElementById("edit-department").value,
-      unit: document.getElementById("edit-unit").value,
-      date: document.getElementById("edit-date").value,
-      key_project: document.getElementById("edit-project").value,
-      key_activity: document.getElementById("edit-activity").value,
-      detail: document.getElementById("edit-detail").value,
-      manday: parseFloat(document.getElementById("edit-manday").value),
-      month: document.getElementById("edit-month").value
-    };
+    if (confirm("คุณแน่ใจหรือไม่ว่าต้องการบันทึกการแก้ไขนี้?")) {
+      const payload = {
+        id: document.getElementById("edit-id").value,
+        name: document.getElementById("edit-name").value,
+        department: document.getElementById("edit-department").value,
+        unit: document.getElementById("edit-unit").value,
+        date: document.getElementById("edit-date").value,
+        key_project: document.getElementById("edit-project").value,
+        key_activity: document.getElementById("edit-activity").value,
+        detail: document.getElementById("edit-detail").value,
+        manday: parseFloat(document.getElementById("edit-manday").value),
+        month: document.getElementById("edit-month").value
+      };
 
-    fetch(`${API_BASE}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "update-record", record: payload })
-    })
-    .then(res => res.json())
-    .then(result => {
-      if (result.success) {
-        alert("บันทึกการแก้ไขเรียบร้อยแล้ว");
-        location.reload();
-      } else {
-        alert("เกิดข้อผิดพลาดในการอัปเดต");
-      }
-    });
+      fetch(`${API_BASE}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update-record", record: payload })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          alert("บันทึกการแก้ไขเรียบร้อยแล้ว");
+          location.reload();
+        } else {
+          alert("เกิดข้อผิดพลาดในการอัปเดต");
+        }
+      });
+    }
   });
 });
 
