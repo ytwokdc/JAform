@@ -392,16 +392,16 @@ async function confirmSubmit() {
   const month = formData.get('month');
 
   const payload = keyProjects.map((kp, i) => ({
-    department,
-    unit,
-    name,
-    date,
-    key_project: kp,
-    key_activity: keyActivities[i],
-    detail: details[i],
-    manday: parseFloat(mandays[i]),
-    month
-  }));
+  "วันที่": date,
+  "เดือนที่รายงาน": month,
+  "ชื่อ-สกุล": name,
+  "ฝ่าย": department,
+  "งาน": unit,
+  "Key Project": kp,
+  "Key Activity": keyActivities[i],
+  "รายละเอียดกิจกรรม": details[i],
+  "Man Day": parseFloat(mandays[i])
+}));
 
   try {
     await fetch('https://your-n8n-domain/webhook-log-productivity', {
