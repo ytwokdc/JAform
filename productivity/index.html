@@ -96,6 +96,7 @@
 
   <button type="button" onclick="addRow()">+ เพิ่มกิจกรรม</button><br>
   <button type="submit">ส่งข้อมูล</button>
+  <button type="button" onclick="previewData()">Preview ก่อนส่ง</button>
 </form>
 
 <script>
@@ -335,6 +336,89 @@ document.addEventListener('DOMContentLoaded', function() {
   clickOpens: true,
   static: true   // << จุดสำคัญ อยู่ติด input เสมอ
 });
+
+function previewData() {
+  const formData = new FormData(document.getElementById('productivity-form'));
+  const name = formData.get('name');
+  const department = formData.get('department');
+  const unit = formData.get('unit');
+  const date = formData.get('date');
+  const month = formData.get('month');
+  const keyProjects = formData.getAll('key_project[]');
+  const keyActivities = formData.getAll('key_activity[]');
+  const details = formData.getAll('detail[]');
+  const mandays = formData.getAll('manday[]');
+
+  let html = `<p><strong>ชื่อ-สกุล:</strong> ${name}</p>`;
+  html += `<p><strong>ฝ่าย:</strong> ${department}</p>`;
+  html += `<p><strong>งาน:</strong> ${unit}</p>`;
+  html += `<p><strong>วันที่:</strong> ${date}</p>`;
+  html += `<p><strong>เดือนที่รายงาน:</strong> ${month}</p>`;
+
+  html += "<table border='1' cellpadding='5' cellspacing='0'><thead><tr><th>Key Project</th><th>Key Activity</th><th>รายละเอียด</th><th>Man Day</th></tr></thead><tbody>";
+
+  for (let i = 0; i < keyProjects.length; i++) {
+    html += `<tr>
+      <td>${keyProjects[i]}</td>
+      <td>${keyActivities[i]}</td>
+      <td>${details[i]}</td>
+      <td>${mandays[i]}</td>
+    </tr>`;
+  }
+
+  html += "</tbody></table>";
+
+  document.getElementById('preview-content').innerHTML = html;
+  document.getElementById('productivity-form').style.display = 'none';
+  document.getElementById('preview-screen').style.display = 'block';
+}
+
+function cancelPreview() {
+  document.getElementById('preview-screen').style.display = 'none';
+  document.getElementById('productivity-form').style.display = 'block';
+}
+
+async function confirmSubmit() {
+  const form = document.getElementById('productivity-form');
+  const formData = new FormData(form);
+  const name = formData.get('name');
+  const department = formData.get('department');
+  const unit = formData.get('unit');
+  const date = formData.get('date');
+  const keyProjects = formData.getAll('key_project[]');
+  const keyActivities = formData.getAll('key_activity[]');
+  const details = formData.getAll('detail[]');
+  const mandays = formData.getAll('manday[]');
+  const month = formData.get('month');
+
+  const payload = keyProjects.map((kp, i) => ({
+    department,
+    unit,
+    name,
+    date,
+    key_project: kp,
+    key_activity: keyActivities[i],
+    detail: details[i],
+    manday: parseFloat(mandays[i]),
+    month
+  }));
+
+  try {
+    await fetch('https://your-n8n-domain/webhook-log-productivity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    alert('✅ ส่งข้อมูลเรียบร้อยแล้ว');
+    form.reset();
+    document.getElementById('task-body').innerHTML = '';
+    cancelPreview();
+    addRow();
+  } catch (error) {
+    console.error("เกิดข้อผิดพลาดในการส่งข้อมูล:", error);
+    alert('เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง');
+  }
+}
 
 });
 </script>
