@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ดูรายการ Productivity ย้อนหลัง</title>
+  <style>
+    body { font-family: 'Sarabun', sans-serif; max-width: 1200px; margin: 2rem auto; padding: 1rem; }
+    h2 { font-family: 'Prompt', sans-serif; text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; vertical-align: top; }
+    button { padding: 0.4rem 0.8rem; }
+    .edit-form { display: none; margin-top: 2rem; border-top: 2px solid #666; padding-top: 1rem; }
+    .edit-form label { display: block; margin-top: 0.5rem; }
+    .edit-form input, .edit-form textarea { width: 100%; padding: 0.4rem; box-sizing: border-box; }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@600&family=Sarabun&display=swap" rel="stylesheet">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <h2>รายการ Productivity ที่กรอกย้อนหลัง</h2>
+  <div id="record-list">กำลังโหลดข้อมูล...</div>
+
+  <div class="edit-form" id="edit-form">
+    <h3>แก้ไขรายการ</h3>
+    <form id="editRecordForm">
+      <input type="hidden" id="edit-id">
+      <label>ชื่อ-สกุล:<input type="text" id="edit-name" required></label>
+      <label>ฝ่าย:<input type="text" id="edit-department" required></label>
+      <label>งาน:<input type="text" id="edit-unit" required></label>
+      <label>วันที่:<input type="text" id="edit-date" required></label>
+      <label>เดือนที่รายงาน:<input type="text" id="edit-month" required></label>
+      <label>Key Project:<input type="text" id="edit-project" required></label>
+      <label>Key Activity:<input type="text" id="edit-activity" required></label>
+      <label>รายละเอียด:<textarea id="edit-detail" required></textarea></label>
+      <label>Man Day:<input type="number" id="edit-manday" step="0.01" min="0" required></label>
+      <button type="submit">บันทึกการแก้ไข</button>
+      <button type="button" onclick="cancelEdit()">ยกเลิก</button>
+    </form>
+  </div>
+</body>
+</html>
