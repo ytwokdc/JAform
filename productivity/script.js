@@ -1,4 +1,4 @@
-const API_BASE = "https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_ID/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbw6AtQIuedTWyYKAZZ0ild3UKegJRfgndsKqAiDgBgOin4hbhAA0eJ_xq-TwEcl97sL/exec";
 
 window.addEventListener("DOMContentLoaded", () => {
   fetch(`${API_BASE}?action=get-records`)
