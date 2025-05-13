@@ -378,7 +378,7 @@ fetch('https://olalarna.app.n8n.cloud/webhook/productivity-log', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   console.log(payload[0]); // ช่วย debug
-body: JSON.stringify(payload[0])
+body: JSON.stringify(payload)  // ✅ ส่งทั้งหมดใน array
 
 });
     document.getElementById("submit-message").innerText = "✅ ส่งข้อมูลเรียบร้อยแล้ว";
