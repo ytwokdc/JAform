@@ -374,7 +374,7 @@ const keyActivities = [...document.querySelectorAll('select[name="key_activity[]
   }));
 
   try {
-   await fetch('https://olalarna.app.n8n.cloud/webhook-test/productivity-log', {
+   await fetch('https://olalarna.app.n8n.cloud/webhook/productivity-log', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'
