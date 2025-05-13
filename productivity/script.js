@@ -1,4 +1,4 @@
-const API_BASE = "https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_ID/exec";
+const API_BASE = "https://olalarna.app.n8n.cloud/webhook/productivity-log";
 
 window.addEventListener("DOMContentLoaded", () => {
   fetch(`${API_BASE}?action=get-records`)
