@@ -310,8 +310,10 @@ function previewData() {
   const unit = formData.get('unit');
   const date = formData.get('date');
   const month = formData.get('month');
-  const keyProjects = formData.getAll('key_project[]');
-  const keyActivities = formData.getAll('key_activity[]');
+  const keyProjects = [...document.querySelectorAll('select[name="key_project[]"]')]
+  .map(el => el.selectedOptions[0].text);
+const keyActivities = [...document.querySelectorAll('select[name="key_activity[]"]')]
+  .map(el => el.selectedOptions[0].text);
   const details = formData.getAll('detail[]');
   const mandays = formData.getAll('manday[]');
 
@@ -351,8 +353,10 @@ async function confirmSubmit() {
   const department = formData.get('department');
   const unit = formData.get('unit');
   const date = formData.get('date');
-  const keyProjects = formData.getAll('key_project[]');
-  const keyActivities = formData.getAll('key_activity[]');
+  const keyProjects = [...document.querySelectorAll('select[name="key_project[]"]')]
+  .map(el => el.selectedOptions[0].text);
+const keyActivities = [...document.querySelectorAll('select[name="key_activity[]"]')]
+  .map(el => el.selectedOptions[0].text);
   const details = formData.getAll('detail[]');
   const mandays = formData.getAll('manday[]');
   const month = formData.get('month');
