@@ -377,7 +377,9 @@ const keyActivities = [...document.querySelectorAll('select[name="key_activity[]
 fetch('https://olalarna.app.n8n.cloud/webhook/productivity-log', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(payload[0])
+  console.log(payload[0]); // ช่วย debug
+body: JSON.stringify(payload[0])
+
 });
     document.getElementById("submit-message").innerText = "✅ ส่งข้อมูลเรียบร้อยแล้ว";
     form.reset();
