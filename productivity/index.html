@@ -93,6 +93,7 @@
 
   <button type="button" onclick="addRow()">+ เพิ่มกิจกรรม</button><br>
   <button type="button" onclick="previewData()">Preview ก่อนส่ง</button>
+<p id="submit-message" style="color: green; font-weight: bold;"></p>
 
 </form>
 <div id="preview-screen" style="display: none; margin-top: 2rem;">
@@ -388,14 +389,15 @@ async function confirmSubmit() {
     }
   })
 });
-    alert('✅ ส่งข้อมูลเรียบร้อยแล้ว');
+    document.getElementById("submit-message").innerText = "✅ ส่งข้อมูลเรียบร้อยแล้ว";
     form.reset();
     document.getElementById('task-body').innerHTML = '';
     cancelPreview();
     addRow();
   } catch (error) {
     console.error("เกิดข้อผิดพลาดในการส่งข้อมูล:", error);
-    alert('เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง');
+    document.getElementById("submit-message").innerText = "❌ เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง";
+
   }
 }
 </script>
