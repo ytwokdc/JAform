@@ -374,7 +374,7 @@ const keyActivities = [...document.querySelectorAll('select[name="key_activity[]
 }));
 
   try {
-fetch('https://script.google.com/macros/s/AKfycbwjTdF7txKp40ye1h5QAt3dclRdLYxMEnUKJjKK_HF_UKyiXBe6iEy6ovde0YfmO8Hb/exec', {
+fetch('https://olalarna.app.n8n.cloud/webhook/productivity-log', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(payload[0])
