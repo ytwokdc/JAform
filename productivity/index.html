@@ -244,46 +244,7 @@ const activityMap = {
 };
 
 const form = document.getElementById('productivity-form');
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const formData = new FormData(form);
-  const name = formData.get('name');
-  const department = formData.get('department');
-  const unit = formData.get('unit');
-  const date = formData.get('date');
-  const keyProjects = formData.getAll('key_project[]');
-  const keyActivities = formData.getAll('key_activity[]');
-  const details = formData.getAll('detail[]');
-  const mandays = formData.getAll('manday[]');
-  const month = formData.get('month');
 
-  const payload = keyProjects.map((kp, i) => ({
-    department,
-    unit,
-    name,
-    date,
-    key_project: kp,
-    key_activity: keyActivities[i],
-    detail: details[i],
-    manday: parseFloat(mandays[i]),
-    month
-  }));
-
-  try {
-    await fetch('https://n8n.ytwokdc.com/webhook/productivity-log', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    alert('ส่งข้อมูลเรียบร้อยแล้ว');
-    form.reset();
-    document.getElementById('task-body').innerHTML = '';
-    addRow();
-  } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการส่งข้อมูล:", error);
-    alert('เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง');
-  }
-});
 
 function addRow() {
   const tbody = document.getElementById('task-body');
