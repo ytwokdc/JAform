@@ -369,7 +369,7 @@ async function confirmSubmit() {
   }));
 
   try {
-    await fetch('https://n8n.ytwokdc.com/webhook/productivity-log', {
+    await fetch('http://localhost:5678/webhook-test/productivity-log', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
