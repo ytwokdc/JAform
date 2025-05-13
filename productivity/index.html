@@ -362,16 +362,16 @@ const keyActivities = [...document.querySelectorAll('select[name="key_activity[]
   const month = formData.get('month');
 
   const payload = keyProjects.map((kp, i) => ({
-    "date": date,
-    "month": month,
-    "name": name,
-    "department": department,
-    "unit": unit,
-    "key_project": kp,
-    "key_activity": keyActivities[i],
-    "detail": details[i],
-    "man_day": parseFloat(mandays[i])
-  }));
+  "date": date,
+  "month": month,
+  "name": name,
+  "department": department,
+  "unit": unit,
+  "key_project": kp,
+  "key_activity": keyActivities[i],
+  "detail": details[i],
+  "manday": parseFloat(mandays[i])  // ✅ เปลี่ยนตรงนี้
+}));
 
   try {
 fetch('https://olalarna.app.n8n.cloud/webhook/productivity-log', {
