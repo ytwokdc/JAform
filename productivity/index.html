@@ -374,15 +374,10 @@ const keyActivities = [...document.querySelectorAll('select[name="key_activity[]
   }));
 
   try {
-   await fetch('https://olalarna.app.n8n.cloud/webhook/productivity-log', {
+fetch('https://olalarna.app.n8n.cloud/webhook/productivity-log', {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
+  headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(payload[0])
-});
-    }
-  })
 });
     document.getElementById("submit-message").innerText = "✅ ส่งข้อมูลเรียบร้อยแล้ว";
     form.reset();
