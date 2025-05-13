@@ -371,10 +371,21 @@ async function confirmSubmit() {
   try {
    await fetch('https://script.google.com/macros/s/AKfycbw6AtQIuedTWyYKAZZ0ild3UKegJRfgndsKqAiDgBgOin4hbhAA0eJ_xq-TwEcl97sL/exec', {
   method: 'POST',
+  mode: 'no-cors',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     action: "update-record",
-    record: payload[0] // <== ถ้า payload เป็น array ให้ส่งแค่ record เดียวก่อน
+    record: {
+      id: 2,
+      name: "ชื่อ",
+      department: "ฝ่าย",
+      unit: "หน่วย",
+      date: "2025-06-12",
+      key_project: "P1",
+      key_activity: "A1",
+      detail: "รายละเอียด",
+      manday: 2
+    }
   })
 });
     alert('✅ ส่งข้อมูลเรียบร้อยแล้ว');
