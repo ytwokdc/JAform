@@ -25,19 +25,28 @@ window.addEventListener("DOMContentLoaded", () => {
         month: document.getElementById("edit-month").value
       };
 
-      fetch(`${API_BASE}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "update-record", record: payload })
-      })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          alert("บันทึกการแก้ไขเรียบร้อยแล้ว");
-          location.reload();
-        } else {
-          alert("เกิดข้อผิดพลาดในการอัปเดต");
-        }
+for (const record of payload) {
+  const res = await fetch(`${API_BASE}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "update-record",
+      record: record
+    })
+  });
+
+  const result = await res.json();
+
+  if (!result.success) {
+    alert("เกิดข้อผิดพลาดในการบันทึก");
+    console.error("ข้อมูลที่บันทึกแล้ว error:", record);
+    return;
+  }
+}
+
+alert("บันทึกการทำงานเรียบร้อยแล้ว");
+location.reload();
+
       });
     }
   });
