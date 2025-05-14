@@ -354,31 +354,43 @@ async function confirmSubmit() {
   const unit = formData.get('unit');
   const date = formData.get('date');
   const keyProjects = [...document.querySelectorAll('select[name="key_project[]"]')]
-  .map(el => el.selectedOptions[0].text);
-const keyActivities = [...document.querySelectorAll('select[name="key_activity[]"]')]
-  .map(el => el.selectedOptions[0].text);
+    .map(el => el.selectedOptions[0].text);
+  const keyActivities = [...document.querySelectorAll('select[name="key_activity[]"]')]
+    .map(el => el.selectedOptions[0].text);
   const details = formData.getAll('detail[]');
   const mandays = formData.getAll('manday[]');
   const month = formData.get('month');
 
   const payload = keyProjects.map((kp, i) => ({
-  "date": date,
-  "month": month,
-  "name": name,
-  "department": department,
-  "unit": unit,
-  "key_project": kp,
-  "key_activity": keyActivities[i],
-  "detail": details[i],
-  "manday": parseFloat(mandays[i])  // ✅ เปลี่ยนตรงนี้
-}));
+    "date": date,
+    "month": month,
+    "name": name,
+    "department": department,
+    "unit": unit,
+    "key_project": kp,
+    "key_activity": keyActivities[i],
+    "detail": details[i],
+    "manday": parseFloat(mandays[i])
+  }));
 
   try {
-fetch('https://olalarna.app.n8n.cloud/webhook/productivity-log', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(payload[0])
-});
+    for (const record of payload) {
+      const res = await fetch('https://olalarna.app.n8n.cloud/webhook/productivity-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: "update-record",
+          record: record
+        })
+      });
+
+      const result = await res.json();
+
+      if (!result.success) {
+        throw new Error("Server returned error");
+      }
+    }
+
     document.getElementById("submit-message").innerText = "✅ ส่งข้อมูลเรียบร้อยแล้ว";
     form.reset();
     document.getElementById('task-body').innerHTML = '';
@@ -387,9 +399,9 @@ fetch('https://olalarna.app.n8n.cloud/webhook/productivity-log', {
   } catch (error) {
     console.error("เกิดข้อผิดพลาดในการส่งข้อมูล:", error);
     document.getElementById("submit-message").innerText = "❌ เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง";
-
   }
 }
+
 </script>
 </body>
 </html>
